@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: scheduler
+Implementation-Version: v2
+Built-By: spiderdt
+Specification-Title: scheduler
+Implementation-Vendor-Id: com.spiderdt.common
+Created-By: Apache Maven 3.5.0
+Build-Jdk: 1.8.0_31
+Specification-Version: v2
+

@@ -1,32 +1,7 @@
-## scheduler v2
+## v2 scheduler 
 后端使用azkaban 作为任务调度平台。
 
 本地存放job信息，批量同步任务状态。
-
-### 框架
-spring+jersey+mybatis+postgresql
-
-### 打包
-
-系统使用maven构建，执行mvn clean install -P[dev,test,prod], 在target目录下，会生成开发包，测试包，线上包 scheduler-v2.war。
-
-跳过单测，使用：mvn clean install  -Dmaven.test.skip=true -Ptest
-
-### 系统流程
-####创建job
-1. 插入scheduler.job_infos记录，设置状态为`init`.
-2. 创建ak的project。name为`[jupiter]_[job_id]_job_name`.
-3. 获取datasource对应的配置。
-4. 通过不同的project和job_type，获取对应的job文件夹。
-5. 结合上面两个信息，替换生成zip文件。并上传到ak。
-6. 获取该project所有的flow_id,以及flow_id下对应的job_id.
-7. 调用execute flow接口。获取各个flow对应的exec_id。
-8. 这些ak信息存放在scheduler.ak_manager_infos表中。
-9. 更新job的状态为new。
-##### 获取任务列表
-接口只会按照用户和状态查询scheduler.job_infos这个数据表。后端分页之后返回。
-通过`JobStatusSyncTask`这个线程，同步ak上的状态到本地数据表。
-
 
 测试示例：
 

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.spiderdt.common.scheduler.dao.JobInfosDao">
+
+    <resultMap id="ResultMap" type="com.spiderdt.common.scheduler.entity.JobInfosEntity">
+    </resultMap>
+
+    <select id="getJobInfoByStatus" resultMap="ResultMap" parameterType="map">
+        select * from scheduler.job_infos where status in
+        <foreach collection="status" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getJobInfoByJobId" resultMap="ResultMap" parameterType="Integer">
+        select * from scheduler.job_infos where job_id= #{job_id};
+    </select>
+    <select id="searchJobInfoByCondition" resultMap="ResultMap" parameterType="com.spiderdt.common.scheduler.controller.InterfaceBean.JobSearchIn">
+        select * from  scheduler.job_infos
+        where user_id = #{user_id}
+        <choose>
+            <when test="job_status!= 'all'">
+                and status= #{job_status}
+            </when>
+            <when test="job_status == 'all'">
+                and status != 'del'
+            </when>
+        </choose>
+        <choose>
+            <when test="job_name != ''">
+                and job_name like #{job_name}
+            </when>
+        </choose>
+        <choose>
+            <when test="orderby=='job_name'|| orderby=='start_time'||orderby=='finished_time'">
+                ORDER BY ${orderby} DESC
+            </when>
+        </choose>
+        <choose>
+                <when test="page_size>0">
+                    limit #{page_size} offset #{page}
+            </when>
+        </choose>
+
+    </select>
+    <update id="updateJobInfo" parameterType="com.spiderdt.common.scheduler.entity.JobInfosEntity">
+        update scheduler.job_infos
+        set job_id = #{jobId}
+        <choose>
+            <when test="startTime != null">
+                ,start_time = #{startTime}
+            </when>
+        </choose>
+        <choose>
+            <when test="status != null">
+                ,status = #{status}
+            </when>
+        </choose>
+        <choose>
+            <when test="errorMessage != null">
+                ,error_message= #{errorMessage}
+            </when>
+        </choose>
+        <choose>
+            <when test="finishedTime!= null">
+                ,finished_time = #{finishedTime}
+            </when>
+        </choose>
+        <choose>
+            <when test="rerunCount!= null">
+                ,rerun_count= #{rerunCount}
+            </when>
+        </choose>
+        <choose>
+            <when test="updateTime!= null">
+                ,update_time = #{updateTime}
+            </when>
+        </choose>
+        where job_id = #{jobId}
+    </update>
+    <update id="updateJobStatus" >
+        update scheduler.job_infos
+        set status= #{status}
+        <choose>
+            <when test="message != null">
+                ,error_message= #{message}
+            </when>
+        </choose>
+        ,update_time = #{update_time}
+        where job_id = #{job_id}
+    </update>
+    <select id="iigetNeedRepProcTaskList" resultMap="ResultMap" parameterType="int">
+        select task.* from dmp_task as task join com_rep_process as rp on rp.task_id = task.task_id
+        where rp.p_status = 0 ;
+    </select>
+    <insert id="createJobInfo"  parameterType="com.spiderdt.common.scheduler.entity.JobInfosEntity" useGeneratedKeys="true">
+        <selectKey resultType="java.lang.Integer" keyProperty="jobId" order="AFTER">
+            SELECT currval('scheduler.job_infos_job_id_seq')
+        </selectKey>
+        insert into scheduler.job_infos
+        (user_id,user_group,job_name,project,job_type,params,status,rerun_count,create_time,update_time)
+        values
+        (#{userId},#{userGroup},#{jobName},#{project},#{jobType},#{params},#{status},#{rerunCount},#{createTime},#{updateTime});
+    </insert>
+
+</mapper>
